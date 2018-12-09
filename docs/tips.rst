@@ -52,7 +52,7 @@ Given the model
 
     class PetConnection(Connection):
         class Meta:
-            node = PetNode
+            node = PetNone
 
 
     class Query(ObjectType):
