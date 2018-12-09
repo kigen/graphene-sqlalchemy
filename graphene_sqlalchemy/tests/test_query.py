@@ -9,7 +9,7 @@ from ..registry import reset_global_registry
 from ..fields import SQLAlchemyConnectionField
 from ..types import SQLAlchemyObjectType
 from ..utils import sort_argument_for_model, sort_enum_for_model
-from .models import Article, Base, Editor, Pet, Reporter, Hairkind
+from .models import Article, Base, Editor, Pet, Reporter
 
 db = create_engine("sqlite:///test_sqlalchemy.sqlite3")
 
@@ -34,7 +34,7 @@ def session():
 
 
 def setup_fixtures(session):
-    pet = Pet(name="Lassie", pet_kind="dog", hair_kind=Hairkind.LONG)
+    pet = Pet(name="Lassie", pet_kind="dog")
     session.add(pet)
     reporter = Reporter(first_name="ABA", last_name="X")
     session.add(reporter)
@@ -105,11 +105,10 @@ def test_should_query_enums(session):
           pet {
             name,
             petKind
-            hairKind
           }
         }
     """
-    expected = {"pet": {"name": "Lassie", "petKind": "dog", "hairKind": "LONG"}}
+    expected = {"pet": {"name": "Lassie", "petKind": "dog"}}
     schema = graphene.Schema(query=Query)
     result = schema.execute(query)
     assert not result.errors
@@ -327,9 +326,9 @@ def test_should_mutate_well(session):
 
 def sort_setup(session):
     pets = [
-        Pet(id=2, name="Lassie", pet_kind="dog", hair_kind=Hairkind.LONG),
-        Pet(id=22, name="Alf", pet_kind="cat", hair_kind=Hairkind.LONG),
-        Pet(id=3, name="Barf", pet_kind="dog", hair_kind=Hairkind.LONG),
+        Pet(id=2, name="Lassie", pet_kind="dog"),
+        Pet(id=22, name="Alf", pet_kind="cat"),
+        Pet(id=3, name="Barf", pet_kind="dog"),
     ]
     session.add_all(pets)
     session.commit()
