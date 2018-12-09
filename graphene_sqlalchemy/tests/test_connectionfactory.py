@@ -1,10 +1,5 @@
-from graphene_sqlalchemy.fields import (
-    SQLAlchemyConnectionField,
-    registerConnectionFieldFactory,
-    unregisterConnectionFieldFactory,
-)
+from graphene_sqlalchemy.fields import SQLAlchemyConnectionField, registerConnectionFieldFactory, unregisterConnectionFieldFactory
 import graphene
-
 
 def test_register():
     class LXConnectionField(SQLAlchemyConnectionField):
@@ -13,9 +8,8 @@ def test_register():
             return q
 
         @classmethod
-        def connection_resolver(
-            cls, resolver, connection, model, root, args, context, info
-        ):
+        def connection_resolver(cls, resolver, connection, model, root, args, context, info):
+
             def LXResolver(root, args, context, info):
                 iterable = resolver(root, args, context, info)
                 if iterable is None:
@@ -25,20 +19,13 @@ def test_register():
                 iterable = cls._applyQueryArgs(model, iterable, args)
                 return iterable
 
-            return SQLAlchemyConnectionField.connection_resolver(
-                LXResolver, connection, model, root, args, context, info
-            )
+            return SQLAlchemyConnectionField.connection_resolver(LXResolver, connection, model, root, args, context, info)
 
     def createLXConnectionField(table):
         class LXConnection(graphene.relay.Connection):
             class Meta:
                 node = table
-
-        return LXConnectionField(
-            LXConnection,
-            filter=table.filter(),
-            order_by=graphene.List(of_type=table.order_by),
-        )
+        return LXConnectionField(LXConnection, filter=table.filter(), order_by=graphene.List(of_type=table.order_by))
 
     registerConnectionFieldFactory(createLXConnectionField)
     unregisterConnectionFieldFactory()

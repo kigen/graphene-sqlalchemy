@@ -14,9 +14,7 @@ def test_register_incorrect_objecttype():
     with pytest.raises(AssertionError) as excinfo:
         reg.register(Spam)
 
-    assert "Only classes of type SQLAlchemyObjectType can be registered" in str(
-        excinfo.value
-    )
+    assert 'Only classes of type SQLAlchemyObjectType can be registered' in str(excinfo.value)
 
 
 def test_register_objecttype():
