@@ -19,10 +19,13 @@ class SQLAlchemyConnectionField(ConnectionField):
     def get_query(cls, model, info, sort=None, **args):
         query = get_query(model, info.context)
         if sort is not None:
-            if isinstance(sort, str):
-                query = query.order_by(sort.order)
-            else:
-                query = query.order_by(*(value.order for value in sort))
+            if isinstance(sort[0], str):
+                sort = [sort]
+            order = []
+            for column_name, direction in sort:
+                column = getattr(model, column_name)
+                order.append(getattr(column, direction)())
+            query = query.order_by(*order)
         return query
 
     @property
