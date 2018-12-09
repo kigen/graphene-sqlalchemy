@@ -43,24 +43,17 @@ def _symbol_name(column_name, is_asc):
 
 
 class EnumValue(str):
-    '''Subclass of str that stores a string and an arbitrary value in the "value" property'''
-
-    def __new__(cls, str_value, value):
+    '''Subclass of str that stores a string value and the sort order of the column'''
+    def __new__(cls, str_value, order):
         return super(EnumValue, cls).__new__(cls, str_value)
 
-    def __init__(self, str_value, value):
+    def __init__(self, str_value, order):
         super(EnumValue, self).__init__()
-        self.value = value
-
-
-# Cache for the generated enums, to avoid name clash
-_ENUM_CACHE = {}
+        self.order = order
 
 
 def _sort_enum_for_model(cls, name=None, symbol_name=_symbol_name):
     name = name or cls.__name__ + 'SortEnum'
-    if name in _ENUM_CACHE:
-        return _ENUM_CACHE[name]
     items = []
     default = []
     for column in inspect(cls).columns.values():
@@ -71,9 +64,7 @@ def _sort_enum_for_model(cls, name=None, symbol_name=_symbol_name):
         if column.primary_key:
             default.append(asc_value)
         items.extend(((asc_name, asc_value), (desc_name, desc_value)))
-    enum = Enum(name, items)
-    _ENUM_CACHE[name] = (enum, default)
-    return enum, default
+    return Enum(name, items), default
 
 
 def sort_enum_for_model(cls, name=None, symbol_name=_symbol_name):
@@ -98,7 +89,7 @@ def sort_enum_for_model(cls, name=None, symbol_name=_symbol_name):
 
 
 def sort_argument_for_model(cls, has_default=True):
-    '''Returns a Graphene argument for the sort field that accepts a list of sorting directions for a model.
+    '''Returns an Graphene argument for the sort field that accepts a list of sorting directions for a model.
     If `has_default` is True (the default) it will sort the result by the primary key(s)
     '''
     enum, default = _sort_enum_for_model(cls)
